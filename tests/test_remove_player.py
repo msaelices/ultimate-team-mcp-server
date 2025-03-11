@@ -10,7 +10,7 @@ from ultimate_mcp_server.modules.functionality.remove_player import remove_playe
 from ultimate_mcp_server.modules.functionality.list_players import list_players
 
 
-def test_remove_player(temp_db_path):
+def test_remove_player(temp_db_uri):
     # Add some players
     players_to_add = [
         ("Player 1", "+1111111111", "player1@example.com"),
@@ -20,17 +20,17 @@ def test_remove_player(temp_db_path):
 
     for name, phone, email in players_to_add:
         command = AddPlayerCommand(
-            name=name, phone=phone, email=email, db_path=temp_db_path
+            name=name, phone=phone, email=email, db_uri=temp_db_uri
         )
         add_player(command)
 
     # Check that all players were added
-    list_command = ListPlayersCommand(db_path=temp_db_path)
+    list_command = ListPlayersCommand(db_uri=temp_db_uri)
     players = list_players(list_command)
     assert len(players) == 3
 
     # Remove a player
-    remove_command = RemovePlayerCommand(name="Player 2", db_path=temp_db_path)
+    remove_command = RemovePlayerCommand(name="Player 2", db_uri=temp_db_uri)
 
     # Check that the remove function returns True
     assert remove_player(remove_command) is True
@@ -46,7 +46,7 @@ def test_remove_player(temp_db_path):
     # Try to remove a player that doesn't exist
     with pytest.raises(ValueError) as excinfo:
         remove_command = RemovePlayerCommand(
-            name="Non-existent Player", db_path=temp_db_path
+            name="Non-existent Player", db_uri=temp_db_uri
         )
         remove_player(remove_command)
 

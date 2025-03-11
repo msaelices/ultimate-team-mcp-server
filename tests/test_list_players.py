@@ -8,7 +8,7 @@ from ultimate_mcp_server.modules.functionality.add_player import add_player
 from ultimate_mcp_server.modules.functionality.list_players import list_players
 
 
-def test_list_players(temp_db_path):
+def test_list_players(temp_db_uri):
     # Add some players
     players_to_add = [
         ("Player 1", "+1111111111", "player1@example.com"),
@@ -20,12 +20,12 @@ def test_list_players(temp_db_path):
 
     for name, phone, email in players_to_add:
         command = AddPlayerCommand(
-            name=name, phone=phone, email=email, db_path=temp_db_path
+            name=name, phone=phone, email=email, db_uri=temp_db_uri
         )
         add_player(command)
 
     # Test listing all players
-    list_command = ListPlayersCommand(db_path=temp_db_path)
+    list_command = ListPlayersCommand(db_uri=temp_db_uri)
 
     players = list_players(list_command)
 
@@ -43,7 +43,7 @@ def test_list_players(temp_db_path):
     assert player3.email == "player3@example.com"
 
     # Test limiting the number of players
-    limit_command = ListPlayersCommand(limit=2, db_path=temp_db_path)
+    limit_command = ListPlayersCommand(limit=2, db_uri=temp_db_uri)
 
     limited_players = list_players(limit_command)
 
@@ -53,9 +53,10 @@ def test_list_players(temp_db_path):
     # Test listing players from an empty database
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as empty_temp_file:
         empty_db_path = Path(empty_temp_file.name)
+        empty_db_uri = f"file://{empty_db_path.absolute()}"
 
     try:
-        empty_command = ListPlayersCommand(db_path=empty_db_path)
+        empty_command = ListPlayersCommand(db_uri=empty_db_uri)
 
         empty_players = list_players(empty_command)
 

@@ -12,7 +12,7 @@ from ultimate_mcp_server.modules.functionality.import_players import import_play
 from ultimate_mcp_server.modules.functionality.list_players import list_players
 
 
-def test_import_players(temp_db_path):
+def test_import_players(temp_db_uri):
     # Create a temporary CSV file
     with tempfile.NamedTemporaryFile(
         suffix=".csv", mode="w", delete=False, newline=""
@@ -26,7 +26,7 @@ def test_import_players(temp_db_path):
 
     try:
         # Create the import command
-        command = ImportPlayersCommand(csv_path=csv_path, db_path=temp_db_path)
+        command = ImportPlayersCommand(csv_path=csv_path, db_uri=temp_db_uri)
 
         # Import the players
         players, errors = import_players(command)
@@ -36,7 +36,7 @@ def test_import_players(temp_db_path):
         assert len(errors) == 0
 
         # Check that the players are in the database
-        list_command = ListPlayersCommand(db_path=temp_db_path)
+        list_command = ListPlayersCommand(db_uri=temp_db_uri)
         db_players = list_players(list_command)
 
         assert len(db_players) == 3
@@ -65,7 +65,7 @@ def test_import_players(temp_db_path):
         try:
             # Create the update command
             update_command = ImportPlayersCommand(
-                csv_path=update_path, db_path=temp_db_path
+                csv_path=update_path, db_uri=temp_db_uri
             )
 
             # Import/update the players
@@ -112,7 +112,7 @@ def test_import_players(temp_db_path):
         try:
             # Create the error command
             error_command = ImportPlayersCommand(
-                csv_path=error_path, db_path=temp_db_path
+                csv_path=error_path, db_uri=temp_db_uri
             )
 
             # Import with errors

@@ -14,10 +14,11 @@ from ultimate_mcp_server.modules.functionality.backup import backup
 from ultimate_mcp_server.modules.functionality.list_players import list_players
 
 
-def test_backup(temp_db_path):
+def test_backup(temp_db_uri):
     # Create a temporary file for the backup database
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as backup_temp_file:
         backup_db_path = Path(backup_temp_file.name)
+        backup_db_uri = f"file://{backup_db_path.absolute()}"
 
     try:
         # Add some players to the source database
@@ -29,12 +30,12 @@ def test_backup(temp_db_path):
 
         for name, phone, email in players_to_add:
             command = AddPlayerCommand(
-                name=name, phone=phone, email=email, db_path=temp_db_path
+                name=name, phone=phone, email=email, db_uri=temp_db_uri
             )
             add_player(command)
 
         # Check that all players were added to the source database
-        list_command = ListPlayersCommand(db_path=temp_db_path)
+        list_command = ListPlayersCommand(db_uri=temp_db_uri)
         players = list_players(list_command)
         assert len(players) == 3
 
@@ -43,7 +44,7 @@ def test_backup(temp_db_path):
             os.unlink(backup_db_path)
 
         # Backup the database
-        backup_command = BackupCommand(backup_path=backup_db_path, db_path=temp_db_path)
+        backup_command = BackupCommand(backup_path=backup_db_path, db_uri=temp_db_uri)
 
         result = backup(backup_command)
 
@@ -78,6 +79,7 @@ def test_backup(temp_db_path):
         # Test backing up an empty database
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as empty_src_file:
             empty_src_path = Path(empty_src_file.name)
+            empty_src_uri = f"file://{empty_src_path.absolute()}"
 
         with tempfile.NamedTemporaryFile(
             suffix=".db", delete=False
@@ -87,7 +89,7 @@ def test_backup(temp_db_path):
         try:
             # Backup the empty database
             empty_backup_command = BackupCommand(
-                backup_path=empty_backup_path, db_path=empty_src_path
+                backup_path=empty_backup_path, db_uri=empty_src_uri
             )
 
             empty_result = backup(empty_backup_command)

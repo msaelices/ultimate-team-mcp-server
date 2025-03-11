@@ -11,27 +11,27 @@ class AddPlayerCommand(BaseModel):
     name: str
     phone: str
     email: Optional[str] = None
-    db_uri: Path = DEFAULT_DB_URI
+    db_uri: str = DEFAULT_DB_URI
 
 
 class ListPlayersCommand(BaseModel):
     limit: int = 1000
-    db_uri: Path = DEFAULT_DB_URI
+    db_uri: str = DEFAULT_DB_URI
 
 
 class RemovePlayerCommand(BaseModel):
     name: str
-    db_uri: Path = DEFAULT_DB_URI
+    db_uri: str = DEFAULT_DB_URI
 
 
 class BackupCommand(BaseModel):
     backup_path: Path
-    db_uri: Path = DEFAULT_DB_URI
+    db_uri: str = DEFAULT_DB_URI
 
 
 class ImportPlayersCommand(BaseModel):
     csv_path: Path
-    db_uri: Path = DEFAULT_DB_URI
+    db_uri: str = DEFAULT_DB_URI
 
 
 class Player(BaseModel):

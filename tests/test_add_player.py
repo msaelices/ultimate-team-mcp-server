@@ -4,13 +4,13 @@ from ultimate_mcp_server.modules.data_types import AddPlayerCommand
 from ultimate_mcp_server.modules.functionality.add_player import add_player
 
 
-def test_add_player(temp_db_path):
+def test_add_player(temp_db_uri):
     # Create a command to add a player
     command = AddPlayerCommand(
         name="Test Player",
         phone="+1234567890",
         email="test@example.com",
-        db_path=temp_db_path,
+        db_uri=temp_db_uri,
     )
 
     # Add the player
@@ -30,7 +30,7 @@ def test_add_player(temp_db_path):
 
     # Add a player without an email
     command2 = AddPlayerCommand(
-        name="Test Player 2", phone="+0987654321", db_path=temp_db_path
+        name="Test Player 2", phone="+0987654321", db_uri=temp_db_uri
     )
 
     player2 = add_player(command2)

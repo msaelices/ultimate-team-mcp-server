@@ -1,19 +1,31 @@
 import os
 import sqlite3
+from urllib.parse import urlparse
 
 
 from ultimate_mcp_server.modules.init_db import init_db
 
 
-def test_init_db(temp_db_path):
+def test_init_db(temp_db_uri):
     # Initialize the database
-    init_db(temp_db_path)
+    init_db(temp_db_uri)
 
+    # Extract the file path from the URI
+    parsed_uri = urlparse(temp_db_uri)
+    db_path = parsed_uri.path
+    
+    # For file:// URIs, path starts with /, which we need to keep on Unix
+    if os.name != 'nt':  # For non-Windows platforms
+        # Keep the path as is
+        pass
+    elif db_path.startswith('/'):  # For Windows
+        db_path = db_path[1:]  # Remove leading slash for Windows compatibility
+        
     # Check that the database file was created
-    assert os.path.exists(temp_db_path)
+    assert os.path.exists(db_path)
 
     # Connect to the database and check the schema
-    conn = sqlite3.connect(temp_db_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Get the list of tables
