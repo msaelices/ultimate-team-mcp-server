@@ -30,7 +30,7 @@ CREATE TABLE if not exists PLAYERS {
   - sqlite3 (standard library)
 - use `uv add <package>` to add libraries.
 - we're using uv to manage the project.
-- add fdu-mcp-server = "fdu_mcp_server:main" to the project.scripts section in pyproject.toml
+- add ultimate-team-mcp-server = "fdu_mcp_server:main" to the project.scripts section in pyproject.toml
 
 ## API
 
@@ -104,4 +104,4 @@ fdu import-players /path/to/players.csv
 
 ## Validation (close the loop)
 - use `uv run pytest` to validate the tests pass.
-- use `uv run fdu-mcp-server --help` to validate the mcp server works.
+- use `uv run ultimate-team-mcp-server --help` to validate the mcp server works.

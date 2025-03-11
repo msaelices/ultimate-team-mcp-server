@@ -41,7 +41,7 @@ def get_long_description():
 
 
 setup(
-    name="fdu-mcp-server",
+    name="ultimate-team-mcp-server",
     version=get_version(),
     description="A Frisbee Team MCP server for managing players",
     long_description=get_long_description(),
@@ -59,8 +59,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "fdu-mcp-server=fdu_mcp_server:main",
+            "ultimate-team-mcp-server=fdu_mcp_server:main",
         ],
     },
 )
-

@@ -37,7 +37,7 @@ class FduTools(str, Enum):
 async def serve(sqlite_database: Optional[Path] = None) -> None:
     logger.info("Starting FDU MCP server")
 
-    server = Server("fdu-mcp-server")
+    server = Server("ultimate-team-mcp-server")
 
     @server.list_tools()
     async def list_tools() -> List[Dict[str, Any]]:
@@ -146,4 +146,3 @@ async def serve(sqlite_database: Optional[Path] = None) -> None:
     options = server.create_initialization_options()
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, options, raise_exceptions=True)
-

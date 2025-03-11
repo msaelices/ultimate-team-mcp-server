@@ -31,7 +31,7 @@ def main():
     # Default to server mode
     if "--help" in sys.argv:
         print("FDU MCP Server - Ultimate Frisbee Team Management")
-        print("Usage: fdu-mcp-server [--db DATABASE_PATH]")
+        print("Usage: ultimate-team-mcp-server [--db DATABASE_PATH]")
         print("")
         print("Options:")
         print("  --db DATABASE_PATH  Path to the SQLite database (default: ~/.fdu.db)")
@@ -48,7 +48,7 @@ def main():
         )
         print("")
         print("For more information on a command, run:")
-        print("  fdu-mcp-server COMMAND --help")
+        print("  ultimate-team-mcp-server COMMAND --help")
         return 0
 
     db_path = None
