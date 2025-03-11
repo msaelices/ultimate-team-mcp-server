@@ -25,19 +25,19 @@ uv venv
 source .venv/bin/activate
 ```
 
-3. Install the package in development mode:
+3. Install the package in development mode with dev dependencies:
 ```bash
-uv pip install -e .
+pip install -e ".[dev]"
 ```
 
-4. Install test dependencies:
-```bash
-uv pip install pytest
-```
+   Or using uv:
+   ```bash
+   uv pip install -e ".[dev]"
+   ```
 
-5. Run tests:
+4. Run tests:
 ```bash
-pytest src/fdu_mcp_server/tests/
+pytest tests/
 ```
 
 ## Usage
