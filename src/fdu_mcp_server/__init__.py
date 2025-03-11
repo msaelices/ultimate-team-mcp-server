@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import sys
 from pathlib import Path
 
@@ -5,18 +7,29 @@ from .server import serve
 from .cli import cli
 from .import_csv import import_csv
 
+
+logger = logging.getLogger(__name__)
+
+
 def main():
     # Check if we're running in CLI mode or server mode
+    logger.info("Starting FDU MCP")
     if len(sys.argv) > 1:
-        if sys.argv[1] in ["add-player", "list-players", "remove-player", "backup", "import-players"]:
+        if sys.argv[1] in [
+            "add-player",
+            "list-players",
+            "remove-player",
+            "backup",
+            "import-players",
+        ]:
             return cli()
         elif sys.argv[1] == "import-csv":
             # Remove the first argument and pass the rest to import_csv
             sys.argv = [sys.argv[0]] + sys.argv[2:]
             return import_csv()
-    
+
     # Default to server mode
-    if "--help" in sys.argv or len(sys.argv) <= 1:
+    if "--help" in sys.argv:
         print("FDU MCP Server - Ultimate Frisbee Team Management")
         print("Usage: fdu-mcp-server [--db DATABASE_PATH]")
         print("")
@@ -30,20 +43,26 @@ def main():
         print("  remove-player       Remove a player from the database")
         print("  backup PATH         Backup the database to a file")
         print("  import-csv CSV_FILE Import players from a CSV file (deprecated)")
-        print("  import-players CSV  Import players from a CSV file, update existing ones")
+        print(
+            "  import-players CSV  Import players from a CSV file, update existing ones"
+        )
         print("")
         print("For more information on a command, run:")
         print("  fdu-mcp-server COMMAND --help")
         return 0
-    
+
     db_path = None
     if "--db" in sys.argv:
         idx = sys.argv.index("--db")
         if idx + 1 < len(sys.argv):
             db_path = Path(sys.argv[idx + 1])
-    
-    serve(db_path)
-    return 0
 
-if __name__ == "__main__":
-    sys.exit(main())
+    # Run the server
+    try:
+        asyncio.run(serve(db_path))
+    except KeyboardInterrupt:
+        logger.info("Server stopped by user")
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        sys.exit(1)
+    return 0
