@@ -51,15 +51,9 @@ def main():
         print("  ultimate-team-mcp-server COMMAND --help")
         return 0
 
-    db_path = None
-    if "--db" in sys.argv:
-        idx = sys.argv.index("--db")
-        if idx + 1 < len(sys.argv):
-            db_path = Path(sys.argv[idx + 1])
-
     # Run the server
     try:
-        asyncio.run(serve(db_path))
+        asyncio.run(serve())
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
     except Exception as e:

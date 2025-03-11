@@ -59,7 +59,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "ultimate-team-mcp-server=fdu_mcp_server:main",
+            "ultimate-team-mcp-server=ultimate_mcp_server:main",
         ],
     },
 )

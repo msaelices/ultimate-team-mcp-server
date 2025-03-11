@@ -1,7 +1,7 @@
 import pytest
 
-from fdu_mcp_server.modules.data_types import AddPlayerCommand
-from fdu_mcp_server.modules.functionality.add_player import add_player
+from ultimate_mcp_server.modules.data_types import AddPlayerCommand
+from ultimate_mcp_server.modules.functionality.add_player import add_player
 
 
 def test_add_player(temp_db_path):
@@ -39,4 +39,3 @@ def test_add_player(temp_db_path):
     assert player2.phone == "+0987654321"
     assert player2.email is None
     assert player2.created is not None
-

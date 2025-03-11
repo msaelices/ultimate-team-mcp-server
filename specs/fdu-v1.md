@@ -30,7 +30,7 @@ CREATE TABLE if not exists PLAYERS {
   - sqlite3 (standard library)
 - use `uv add <package>` to add libraries.
 - we're using uv to manage the project.
-- add ultimate-team-mcp-server = "fdu_mcp_server:main" to the project.scripts section in pyproject.toml
+- add ultimate-team-mcp-server = "ultimate_mcp_server:main" to the project.scripts section in pyproject.toml
 
 ## API
 
