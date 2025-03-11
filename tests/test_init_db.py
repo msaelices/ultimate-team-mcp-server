@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ..modules.init_db import init_db
+from fdu_mcp_server.modules.init_db import init_db
 
 def test_init_db(temp_db_path):
     # Initialize the database

@@ -5,16 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from ...modules.data_types import AddPlayerCommand, BackupCommand, ListPlayersCommand
-from ...modules.functionality.add_player import add_player
-from ...modules.functionality.backup import backup
-from ...modules.functionality.list_players import list_players
+from fdu_mcp_server.modules.data_types import AddPlayerCommand, BackupCommand, ListPlayersCommand
+from fdu_mcp_server.modules.functionality.add_player import add_player
+from fdu_mcp_server.modules.functionality.backup import backup
+from fdu_mcp_server.modules.functionality.list_players import list_players
 
-def test_backup():
-    # Create a temporary file for the source database
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as src_temp_file:
-        src_db_path = Path(src_temp_file.name)
-    
+def test_backup(temp_db_path):
     # Create a temporary file for the backup database
     with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as backup_temp_file:
         backup_db_path = Path(backup_temp_file.name)
@@ -32,12 +28,12 @@ def test_backup():
                 name=name,
                 phone=phone,
                 email=email,
-                db_path=src_db_path
+                db_path=temp_db_path
             )
             add_player(command)
         
         # Check that all players were added to the source database
-        list_command = ListPlayersCommand(db_path=src_db_path)
+        list_command = ListPlayersCommand(db_path=temp_db_path)
         players = list_players(list_command)
         assert len(players) == 3
         
@@ -48,7 +44,7 @@ def test_backup():
         # Backup the database
         backup_command = BackupCommand(
             backup_path=backup_db_path,
-            db_path=src_db_path
+            db_path=temp_db_path
         )
         
         result = backup(backup_command)
@@ -89,10 +85,6 @@ def test_backup():
             empty_backup_path = Path(empty_backup_file.name)
         
         try:
-            # Remove the backup file if it exists
-            if os.path.exists(empty_backup_path):
-                os.unlink(empty_backup_path)
-            
             # Backup the empty database
             empty_backup_command = BackupCommand(
                 backup_path=empty_backup_path,
@@ -106,17 +98,13 @@ def test_backup():
             
             # Check that the backup file was created
             assert os.path.exists(empty_backup_path)
-        
         finally:
             # Clean up the empty database files
             if os.path.exists(empty_src_path):
                 os.unlink(empty_src_path)
             if os.path.exists(empty_backup_path):
                 os.unlink(empty_backup_path)
-    
     finally:
-        # Clean up by removing the temporary database files
-        if os.path.exists(src_db_path):
-            os.unlink(src_db_path)
+        # Clean up the backup database file
         if os.path.exists(backup_db_path):
             os.unlink(backup_db_path)
