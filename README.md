@@ -82,6 +82,12 @@ claude mcp add fdu -- fdu-mcp-server
 claude mcp list
 ```
 
+4. Add the WhatsApp MCP server (optional):
+```bash
+uv pip install git+https://github.com/msaelices/whatsapp-mcp-server.git@main
+claude mcp add whatsapp -- whatsapp-mcp-server
+```
+
 4. Use the server via Claude:
 ```bash
 claude
