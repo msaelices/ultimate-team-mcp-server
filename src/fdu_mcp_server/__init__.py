@@ -8,7 +8,7 @@ from .import_csv import import_csv
 def main():
     # Check if we're running in CLI mode or server mode
     if len(sys.argv) > 1:
-        if sys.argv[1] in ["add-player", "list-players", "remove-player", "backup"]:
+        if sys.argv[1] in ["add-player", "list-players", "remove-player", "backup", "import-players"]:
             return cli()
         elif sys.argv[1] == "import-csv":
             # Remove the first argument and pass the rest to import_csv
@@ -29,7 +29,8 @@ def main():
         print("  list-players        List players in the database")
         print("  remove-player       Remove a player from the database")
         print("  backup PATH         Backup the database to a file")
-        print("  import-csv CSV_FILE Import players from a CSV file")
+        print("  import-csv CSV_FILE Import players from a CSV file (deprecated)")
+        print("  import-players CSV  Import players from a CSV file, update existing ones")
         print("")
         print("For more information on a command, run:")
         print("  fdu-mcp-server COMMAND --help")

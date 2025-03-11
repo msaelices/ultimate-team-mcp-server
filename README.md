@@ -57,8 +57,11 @@ fdu-mcp-server remove-player --name "John Smith"
 # Backup the database
 fdu-mcp-server backup /path/to/backup.db
 
-# Import players from a CSV file
+# Import players from a CSV file (deprecated)
 fdu-mcp-server import-csv /path/to/players.csv
+
+# Import players from a CSV file, updating existing ones
+fdu-mcp-server import-players /path/to/players.csv
 ```
 
 ### MCP Server Usage
@@ -99,7 +102,7 @@ CREATE TABLE players (
 
 ## CSV Import Format
 
-The CSV import feature accepts files with the following format:
+The CSV import features (both import-csv and import-players) accept files with the following format:
 
 ```csv
 Nombre,Telefono,Email
@@ -107,4 +110,15 @@ John Smith,+1234567890,john@example.com
 Jane Doe,+0987654321,jane@example.com
 ```
 
-Column names are case-insensitive and can be in English or Spanish.
+Column names are case-insensitive and can be in English or Spanish (Nombre/Name, Telefono/Phone, Email).
+
+### Difference between import-csv and import-players
+
+- **import-csv**: The original import tool. It adds new players but fails if a player with the same name already exists.
+- **import-players**: The enhanced import tool. It adds new players AND updates existing ones if a player with the same name is found.
+
+Example of updating a player with import-players:
+
+1. If your database has a player "John Smith" with phone "+1234567890"
+2. And your CSV has "John Smith" with phone "+9999999999"
+3. After import-players, "John Smith" will have the updated phone number "+9999999999"

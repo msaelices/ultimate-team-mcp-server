@@ -50,6 +50,9 @@ fdu remove-player \
 
 fdu backup <backup_absolute_path> \
     --db: str = DEFAULT_SQLITE_DATABASE_PATH
+
+fdu import-players <csv_file_path> \
+    --db: str = DEFAULT_SQLITE_DATABASE_PATH
 ```
 
 ### Example API Calls (for find modes)
@@ -62,6 +65,9 @@ fdu list-players
 
 # remove player
 fdu remove-player --name "John Smith"
+
+# import players from CSV file (updates existing ones)
+fdu import-players /path/to/players.csv
 
 ```
 

@@ -6,12 +6,14 @@ from .modules.data_types import (
     AddPlayerCommand,
     ListPlayersCommand,
     RemovePlayerCommand,
-    BackupCommand
+    BackupCommand,
+    ImportPlayersCommand
 )
 from .modules.functionality.add_player import add_player
 from .modules.functionality.list_players import list_players
 from .modules.functionality.remove_player import remove_player
 from .modules.functionality.backup import backup
+from .modules.functionality.import_players import import_players
 from .modules.constants import DEFAULT_SQLITE_DATABASE_PATH
 
 @click.group()
@@ -92,6 +94,43 @@ def backup_command(backup_path, db):
         )
         result = backup(command)
         click.echo(result)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+@cli.command("import-players")
+@click.argument("csv_file", type=click.Path(exists=True))
+@click.option("--db", default=str(DEFAULT_SQLITE_DATABASE_PATH), help="Database path")
+def import_players_command(csv_file, db):
+    """Import players from a CSV file, updating existing players.
+    
+    CSV_FILE must be a CSV file with headers. The following headers are recognized:
+    - name/nombre: The player's name (required)
+    - phone/telefono: The player's phone number (required)
+    - email: The player's email address (optional)
+    """
+    try:
+        command = ImportPlayersCommand(
+            csv_path=Path(csv_file),
+            db_path=Path(db)
+        )
+        
+        players, errors = import_players(command)
+        
+        # Print results
+        if players:
+            click.echo(f"Successfully imported/updated {len(players)} players:")
+            for player in players:
+                email_display = f", Email: {player.email}" if player.email else ""
+                click.echo(f"- {player.name} (Phone: {player.phone}{email_display})")
+        
+        if errors:
+            click.echo(f"\nEncountered {len(errors)} errors:")
+            for error in errors:
+                click.echo(f"- {error}")
+                
+        click.echo(f"\nImport complete: {len(players)} successes, {len(errors)} failures.")
+        
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         sys.exit(1)

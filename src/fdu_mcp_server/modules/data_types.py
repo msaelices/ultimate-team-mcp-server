@@ -24,6 +24,10 @@ class BackupCommand(BaseModel):
     backup_path: Path
     db_path: Path = DEFAULT_SQLITE_DATABASE_PATH
 
+class ImportPlayersCommand(BaseModel):
+    csv_path: Path
+    db_path: Path = DEFAULT_SQLITE_DATABASE_PATH
+
 class Player(BaseModel):
     name: str
     phone: str

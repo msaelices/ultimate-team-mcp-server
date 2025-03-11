@@ -9,12 +9,14 @@ from .modules.data_types import (
     ListPlayersCommand,
     RemovePlayerCommand,
     BackupCommand,
+    ImportPlayersCommand,
     Player
 )
 from .modules.functionality.add_player import add_player
 from .modules.functionality.list_players import list_players
 from .modules.functionality.remove_player import remove_player
 from .modules.functionality.backup import backup
+from .modules.functionality.import_players import import_players
 from .modules.constants import DEFAULT_SQLITE_DATABASE_PATH
 
 server = Server("fdu")
@@ -67,6 +69,17 @@ def serve(sqlite_database: Optional[Path] = None) -> None:
                     },
                     "required": ["backup_path"]
                 }
+            },
+            {
+                "name": "import-players",
+                "description": "Import players from a CSV file, updating existing players",
+                "parameter_schema": {
+                    "type": "object",
+                    "properties": {
+                        "csv_path": {"type": "string"}
+                    },
+                    "required": ["csv_path"]
+                }
             }
         ]
 
@@ -107,6 +120,20 @@ def serve(sqlite_database: Optional[Path] = None) -> None:
             )
             result = backup(command)
             return {"status": "success", "message": result}
+        
+        elif tool_name == "import-players":
+            command = ImportPlayersCommand(
+                csv_path=Path(parameters["csv_path"]),
+                db_path=db_path
+            )
+            players, errors = import_players(command)
+            return {
+                "status": "success", 
+                "imported": len(players), 
+                "errors": len(errors),
+                "players": [player.model_dump() for player in players],
+                "error_messages": errors
+            }
         
         else:
             return {"error": f"Unknown tool: {tool_name}"}
