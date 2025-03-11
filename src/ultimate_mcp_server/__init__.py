@@ -5,7 +5,6 @@ from pathlib import Path
 
 from .server import serve
 from .cli import cli
-from .import_csv import import_csv
 
 
 logger = logging.getLogger(__name__)
@@ -23,10 +22,6 @@ def main():
             "import-players",
         ]:
             return cli()
-        elif sys.argv[1] == "import-csv":
-            # Remove the first argument and pass the rest to import_csv
-            sys.argv = [sys.argv[0]] + sys.argv[2:]
-            return import_csv()
 
     # Default to server mode
     if "--help" in sys.argv:

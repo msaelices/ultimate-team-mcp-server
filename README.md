@@ -120,11 +120,11 @@ CREATE TABLE players (
 The server can connect to either a local SQLite database or SQLiteCloud for a cloud-based solution using a single database URI parameter. To configure the database connection:
 
 1. Create a `.env` file based on the provided `.env-template`
-2. Set the `SQLITE_URI` environment variable to one of the following formats:
-   - For SQLiteCloud: `SQLITE_URI=sqlitecloud://hostname:port/database?apikey=your_api_key`
-   - For local SQLite: `SQLITE_URI=file:///path/to/database.db`
+2. Set the `DB_URI` environment variable to one of the following formats:
+   - For SQLiteCloud: `DB_URI=sqlitecloud://hostname:port/database?apikey=your_api_key`
+   - For local SQLite: `DB_URI=file:///path/to/database.db`
 
-If the `SQLITE_URI` environment variable is not set, the server will default to using a local SQLite database at `./db/fdu.db`.
+If the `DB_URI` environment variable is not set, the server will default to using a local SQLite database at `./ultimate.db`.
 
 ## CSV Import Format
 
