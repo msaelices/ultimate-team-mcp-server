@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 
 from mcp.server import Server
 from mcp.types import Tool, TextContent
@@ -19,7 +19,6 @@ from .modules.functionality.list_players import list_players
 from .modules.functionality.remove_player import remove_player
 from .modules.functionality.backup import backup
 from .modules.functionality.import_players import import_players
-from .modules.constants import DEFAULT_SQLITE_DATABASE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ class FduTools(str, Enum):
     BACKUP = "backup"
 
 
-async def serve(sqlite_database: Optional[Path] = None) -> None:
+async def serve() -> None:
     logger.info("Starting FDU MCP server")
 
     server = Server("ultimate-team-mcp-server")
@@ -71,14 +70,11 @@ async def serve(sqlite_database: Optional[Path] = None) -> None:
 
     @server.call_tool()
     async def call_tool(tool_name: str, parameters: dict) -> list[TextContent]:
-        db_path = sqlite_database or DEFAULT_SQLITE_DATABASE_PATH
-
         if tool_name == "add-player":
             command = AddPlayerCommand(
                 name=parameters["name"],
                 phone=parameters["phone"],
                 email=parameters.get("email"),
-                db_path=db_path,
             )
             player = add_player(command)
             return [
@@ -90,7 +86,7 @@ async def serve(sqlite_database: Optional[Path] = None) -> None:
 
         elif tool_name == "list-players":
             command = ListPlayersCommand(
-                limit=parameters.get("limit", 1000), db_path=db_path
+                limit=parameters.get("limit", 1000),
             )
             players = list_players(command)
             return [
@@ -108,7 +104,9 @@ async def serve(sqlite_database: Optional[Path] = None) -> None:
             ]
 
         elif tool_name == "remove-player":
-            command = RemovePlayerCommand(name=parameters["name"], db_path=db_path)
+            command = RemovePlayerCommand(
+                name=parameters["name"],
+            )
             remove_player(command)
             return [
                 TextContent(
@@ -119,7 +117,7 @@ async def serve(sqlite_database: Optional[Path] = None) -> None:
 
         elif tool_name == "backup":
             command = BackupCommand(
-                backup_path=Path(parameters["backup_path"]), db_path=db_path
+                backup_path=Path(parameters["backup_path"]),
             )
             result = backup(command)
             return [
@@ -131,7 +129,7 @@ async def serve(sqlite_database: Optional[Path] = None) -> None:
 
         elif tool_name == "import-players":
             command = ImportPlayersCommand(
-                csv_path=Path(parameters["csv_path"]), db_path=db_path
+                csv_path=Path(parameters["csv_path"]),
             )
             players, errors = import_players(command)
             return [

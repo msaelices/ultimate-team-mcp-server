@@ -1,3 +1,5 @@
 click>=8.0.0
 mcp
 pydantic>=2.0.0
+sqlitecloud
+python-dotenv

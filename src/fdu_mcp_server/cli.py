@@ -14,7 +14,7 @@ from .modules.functionality.list_players import list_players
 from .modules.functionality.remove_player import remove_player
 from .modules.functionality.backup import backup
 from .modules.functionality.import_players import import_players
-from .modules.constants import DEFAULT_SQLITE_DATABASE_PATH
+from .modules.constants import DEFAULT_DB_URI
 
 @click.group()
 def cli():
@@ -25,15 +25,15 @@ def cli():
 @click.argument("name")
 @click.option("--phone", "-p", required=True, help="Player's phone number")
 @click.option("--email", "-e", help="Player's email address")
-@click.option("--db", default=str(DEFAULT_SQLITE_DATABASE_PATH), help="Database path")
-def add_player_command(name, phone, email, db):
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def add_player_command(name, phone, email, db_uri):
     """Add a new player to the database."""
     try:
         command = AddPlayerCommand(
             name=name,
             phone=phone,
             email=email,
-            db_path=Path(db)
+            db_uri=db_uri
         )
         player = add_player(command)
         click.echo(f"Added player: {player.name}")
@@ -43,13 +43,13 @@ def add_player_command(name, phone, email, db):
 
 @cli.command("list-players")
 @click.option("--limit", "-l", default=1000, help="Maximum number of players to list")
-@click.option("--db", default=str(DEFAULT_SQLITE_DATABASE_PATH), help="Database path")
-def list_players_command(limit, db):
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def list_players_command(limit, db_uri):
     """List players in the database."""
     try:
         command = ListPlayersCommand(
             limit=limit,
-            db_path=Path(db)
+            db_uri=db_uri
         )
         players = list_players(command)
         
@@ -68,13 +68,13 @@ def list_players_command(limit, db):
 
 @cli.command("remove-player")
 @click.option("--name", "-n", required=True, help="Name of the player to remove")
-@click.option("--db", default=str(DEFAULT_SQLITE_DATABASE_PATH), help="Database path")
-def remove_player_command(name, db):
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def remove_player_command(name, db_uri):
     """Remove a player from the database."""
     try:
         command = RemovePlayerCommand(
             name=name,
-            db_path=Path(db)
+            db_uri=db_uri
         )
         remove_player(command)
         click.echo(f"Player '{name}' removed successfully")
@@ -84,13 +84,13 @@ def remove_player_command(name, db):
 
 @cli.command("backup")
 @click.argument("backup_path")
-@click.option("--db", default=str(DEFAULT_SQLITE_DATABASE_PATH), help="Database path")
-def backup_command(backup_path, db):
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def backup_command(backup_path, db_uri):
     """Backup the database to a file."""
     try:
         command = BackupCommand(
             backup_path=Path(backup_path),
-            db_path=Path(db)
+            db_uri=db_uri
         )
         result = backup(command)
         click.echo(result)
@@ -100,8 +100,8 @@ def backup_command(backup_path, db):
 
 @cli.command("import-players")
 @click.argument("csv_file", type=click.Path(exists=True))
-@click.option("--db", default=str(DEFAULT_SQLITE_DATABASE_PATH), help="Database path")
-def import_players_command(csv_file, db):
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def import_players_command(csv_file, db_uri):
     """Import players from a CSV file, updating existing players.
     
     CSV_FILE must be a CSV file with headers. The following headers are recognized:
@@ -112,7 +112,7 @@ def import_players_command(csv_file, db):
     try:
         command = ImportPlayersCommand(
             csv_path=Path(csv_file),
-            db_path=Path(db)
+            db_uri=db_uri
         )
         
         players, errors = import_players(command)

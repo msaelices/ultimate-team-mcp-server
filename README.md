@@ -35,7 +35,15 @@ pip install -e ".[dev]"
    uv pip install -e ".[dev]"
    ```
 
-4. Run tests:
+4. Set up environment variables (optional, for SQLiteCloud):
+   
+   Copy the .env-template file to .env and fill in the appropriate values:
+   ```bash
+   cp .env-template .env
+   # Edit .env with your SQLiteCloud credentials
+   ```
+
+5. Run tests:
 ```bash
 pytest tests/
 ```
@@ -57,11 +65,12 @@ ultimate-team-mcp-server remove-player --name "John Smith"
 # Backup the database
 ultimate-team-mcp-server backup /path/to/backup.db
 
-# Import players from a CSV file (deprecated)
-ultimate-team-mcp-server import-csv /path/to/players.csv
-
 # Import players from a CSV file, updating existing ones
 ultimate-team-mcp-server import-players /path/to/players.csv
+
+# Using with a specific database URI
+ultimate-team-mcp-server list-players --db-uri "sqlitecloud://host:port/database?apikey=key"
+ultimate-team-mcp-server add-player "John" --phone "+1234567890" --db-uri "file:///path/to/custom.db"
 ```
 
 ### MCP Server Usage
@@ -95,7 +104,7 @@ claude
 
 ## Database Structure
 
-The server uses SQLite to store player information. The database schema is:
+The server can use either local SQLite or SQLiteCloud to store player information. The database schema is:
 
 ```sql
 CREATE TABLE players (
@@ -105,6 +114,17 @@ CREATE TABLE players (
     email TEXT
 )
 ```
+
+### Database Configuration
+
+The server can connect to either a local SQLite database or SQLiteCloud for a cloud-based solution using a single database URI parameter. To configure the database connection:
+
+1. Create a `.env` file based on the provided `.env-template`
+2. Set the `SQLITE_URI` environment variable to one of the following formats:
+   - For SQLiteCloud: `SQLITE_URI=sqlitecloud://hostname:port/database?apikey=your_api_key`
+   - For local SQLite: `SQLITE_URI=file:///path/to/database.db`
+
+If the `SQLITE_URI` environment variable is not set, the server will default to using a local SQLite database at `./db/fdu.db`.
 
 ## CSV Import Format
 

@@ -1,11 +1,11 @@
 import csv
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 from ..data_types import ImportPlayersCommand, Player
 from ..init_db import init_db
+from ..utils import get_connection
 
 def import_players(command: ImportPlayersCommand) -> Tuple[List[Player], List[str]]:
     """
@@ -15,13 +15,13 @@ def import_players(command: ImportPlayersCommand) -> Tuple[List[Player], List[st
     - List of successfully imported/updated players
     - List of error messages for failed imports
     """
-    init_db(command.db_path)
+    init_db(command.db_uri)
     
     csv_path = Path(command.csv_path)
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
     
-    conn = sqlite3.connect(command.db_path)
+    conn = get_connection(command.db_uri)
     cursor = conn.cursor()
     
     successful_imports = []

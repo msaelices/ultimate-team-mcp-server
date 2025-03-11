@@ -1,14 +1,13 @@
-import sqlite3
 from datetime import datetime
-from pathlib import Path
 
 from ..data_types import AddPlayerCommand, Player
 from ..init_db import init_db
+from ..utils import get_connection
 
 def add_player(command: AddPlayerCommand) -> Player:
-    init_db(command.db_path)
+    init_db(command.db_uri)
     
-    conn = sqlite3.connect(command.db_path)
+    conn = get_connection(command.db_uri)
     cursor = conn.cursor()
     
     now = datetime.now()
@@ -19,9 +18,12 @@ def add_player(command: AddPlayerCommand) -> Player:
             (command.name, now, command.phone, command.email)
         )
         conn.commit()
-    except sqlite3.IntegrityError:
+    except Exception as e:
         conn.close()
-        raise ValueError(f"Player '{command.name}' already exists")
+        # Handle both sqlite3.IntegrityError and sqlitecloud equivalent
+        if "UNIQUE constraint failed" in str(e) or "already exists" in str(e):
+            raise ValueError(f"Player '{command.name}' already exists")
+        raise
     
     conn.close()
     

@@ -1,14 +1,14 @@
-import sqlite3
 from datetime import datetime
 from typing import List
 
 from ..data_types import ListPlayersCommand, Player
 from ..init_db import init_db
+from ..utils import get_connection
 
 def list_players(command: ListPlayersCommand) -> List[Player]:
-    init_db(command.db_path)
+    init_db(command.db_uri)
     
-    conn = sqlite3.connect(command.db_path)
+    conn = get_connection(command.db_uri)
     cursor = conn.cursor()
     
     cursor.execute(
