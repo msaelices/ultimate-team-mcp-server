@@ -1,5 +1,5 @@
 click>=8.0.0
-mcp
+mcp>=1.6.0
 pydantic>=2.0.0
 sqlitecloud
 python-dotenv
