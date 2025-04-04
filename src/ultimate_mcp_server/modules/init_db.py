@@ -39,7 +39,7 @@ def init_db(db_uri: str = DEFAULT_DB_URI) -> None:
         created TIMESTAMP NOT NULL
     )
     """)
-    
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS tournament_players (
         tournament_id INTEGER,
@@ -52,13 +52,13 @@ def init_db(db_uri: str = DEFAULT_DB_URI) -> None:
         FOREIGN KEY (player_name) REFERENCES players(name) ON DELETE CASCADE
     )
     """)
-    
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS federation_payments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         player_name TEXT NOT NULL,
         payment_date TIMESTAMP NOT NULL,
-        amount REAL NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
         notes TEXT,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (player_name) REFERENCES players(name) ON DELETE CASCADE
