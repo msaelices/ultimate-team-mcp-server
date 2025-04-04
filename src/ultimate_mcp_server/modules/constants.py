@@ -4,6 +4,7 @@ from pathlib import Path
 # Try to load environment variables from .env file
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     # dotenv is optional
@@ -19,6 +20,6 @@ DEFAULT_LOCAL_DB_PATH = HOME_DIR / ".ultimate.db"
 # - file:///path/to/local/database.db
 # Priority:
 # 1. SQLITE_URI environment variable (FastMCP default)
-# 2. DB_URI environment variable (backwards compatibility)
 # 3. Default local file path
-DEFAULT_DB_URI = os.getenv("SQLITE_URI", os.getenv("DB_URI", f"file://{DEFAULT_LOCAL_DB_PATH}"))
+DEFAULT_DB_URI = os.getenv("SQLITE_URI", f"file://{DEFAULT_LOCAL_DB_PATH}")
+

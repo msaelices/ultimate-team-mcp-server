@@ -63,7 +63,6 @@ class ServerConfig(BaseModel):
     )
 
 
-# Define the server lifespan context manager
 @asynccontextmanager
 async def server_lifespan(mcp_server: FastMCP) -> AsyncIterator[Dict[str, Any]]:
     """Server lifespan context manager."""
@@ -71,7 +70,9 @@ async def server_lifespan(mcp_server: FastMCP) -> AsyncIterator[Dict[str, Any]]:
     logger.info("Starting Ultimate Team MCP server")
 
     # Return empty context - we'll pass db_uri to each tool function
-    yield {}
+    yield {
+        "db_uri": DEFAULT_DB_URI,
+    }
 
     # Server shutdown
     logger.info("Shutting down Ultimate Team MCP server")
@@ -96,7 +97,10 @@ def add_player_tool(
 ) -> str:
     """Add a new player to the database."""
     command = AddPlayerCommand(
-        name=name, phone=phone, email=email, db_uri=ctx.config.db_uri
+        name=name,
+        phone=phone,
+        email=email,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
     player = add_player(command)
     return f"Player '{player.name}' added successfully"
@@ -109,7 +113,9 @@ def list_players_tool(
     limit: int = Field(1000, description="Maximum number of players to list"),
 ) -> str:
     """List players in the database."""
-    command = ListPlayersCommand(limit=limit, db_uri=ctx.config.db_uri)
+    command = ListPlayersCommand(
+        limit=limit, db_uri=ctx.request_context.lifespan_context["db_uri"]
+    )
     players = list_players(command)
 
     if not players:
@@ -130,7 +136,9 @@ def remove_player_tool(
     name: str = Field(..., description="Player's name to remove"),
 ) -> str:
     """Remove a player from the database."""
-    command = RemovePlayerCommand(name=name, db_uri=ctx.config.db_uri)
+    command = RemovePlayerCommand(
+        name=name, db_uri=ctx.request_context.lifespan_context["db_uri"]
+    )
     remove_player(command)
     return f"Player '{name}' removed successfully"
 
@@ -142,7 +150,10 @@ def backup_tool(
     backup_path: str = Field(..., description="Path to save the backup file"),
 ) -> str:
     """Backup the database to a file."""
-    command = BackupCommand(backup_path=Path(backup_path), db_uri=ctx.config.db_uri)
+    command = BackupCommand(
+        backup_path=Path(backup_path),
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
+    )
     result = backup(command)
     return result
 
@@ -161,7 +172,9 @@ def import_players_tool(
     - phone/telefono: The player's phone number (required)
     - email: The player's email address (optional)
     """
-    command = ImportPlayersCommand(csv_path=Path(csv_path), db_uri=ctx.config.db_uri)
+    command = ImportPlayersCommand(
+        csv_path=Path(csv_path), db_uri=ctx.request_context.lifespan_context["db_uri"]
+    )
 
     players, errors = import_players(command)
 
@@ -212,7 +225,7 @@ def add_tournament_tool(
         date=tournament_date,
         surface=surface_type,
         registration_deadline=deadline_date,
-        db_uri=ctx.config.db_uri,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = add_tournament(command)
@@ -225,7 +238,9 @@ def list_tournaments_tool(
     limit: int = Field(1000, description="Maximum number of tournaments to list"),
 ) -> str:
     """List tournaments in the database."""
-    command = ListTournamentsCommand(limit=limit, db_uri=ctx.config.db_uri)
+    command = ListTournamentsCommand(
+        limit=limit, db_uri=ctx.request_context.lifespan_context["db_uri"]
+    )
 
     tournaments = list_tournaments(command)
 
@@ -279,7 +294,7 @@ def update_tournament_tool(
         date=tournament_date,
         surface=surface_type,
         registration_deadline=deadline_date,
-        db_uri=ctx.config.db_uri,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = update_tournament(command)
@@ -292,7 +307,9 @@ def remove_tournament_tool(
     id: int = Field(..., description="Tournament ID to remove"),
 ) -> str:
     """Remove a tournament from the database."""
-    command = RemoveTournamentCommand(id=id, db_uri=ctx.config.db_uri)
+    command = RemoveTournamentCommand(
+        id=id, db_uri=ctx.request_context.lifespan_context["db_uri"]
+    )
 
     result = remove_tournament(command)
     return result
@@ -309,7 +326,9 @@ def register_player_tool(
 ) -> str:
     """Register a player for a tournament."""
     command = RegisterPlayerCommand(
-        tournament_id=tournament_id, player_name=player_name, db_uri=ctx.config.db_uri
+        tournament_id=tournament_id,
+        player_name=player_name,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = register_player(command)
@@ -324,7 +343,9 @@ def unregister_player_tool(
 ) -> str:
     """Unregister a player from a tournament."""
     command = UnregisterPlayerCommand(
-        tournament_id=tournament_id, player_name=player_name, db_uri=ctx.config.db_uri
+        tournament_id=tournament_id,
+        player_name=player_name,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = unregister_player(command)
@@ -339,7 +360,9 @@ def list_tournament_players_tool(
 ) -> str:
     """List all players registered for a tournament."""
     command = ListTournamentPlayersCommand(
-        tournament_id=tournament_id, limit=limit, db_uri=ctx.config.db_uri
+        tournament_id=tournament_id,
+        limit=limit,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     tournament, players = list_tournament_players(command)
@@ -379,7 +402,9 @@ def list_player_tournaments_tool(
 ) -> str:
     """List all tournaments a player is registered for."""
     command = ListPlayerTournamentsCommand(
-        player_name=player_name, limit=limit, db_uri=ctx.config.db_uri
+        player_name=player_name,
+        limit=limit,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     player, tournaments = list_player_tournaments(command)
@@ -428,7 +453,7 @@ def mark_payment_tool(
         tournament_id=tournament_id,
         player_name=player_name,
         payment_date=payment_datetime,
-        db_uri=ctx.config.db_uri,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = mark_payment(command)
@@ -447,7 +472,7 @@ def clear_payment_tool(
     command = ClearPaymentCommand(
         tournament_id=tournament_id,
         player_name=player_name,
-        db_uri=ctx.config.db_uri,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = clear_payment(command)
@@ -470,7 +495,7 @@ def search_paid_players_tool(
         name_query=name,
         match_threshold=threshold,
         limit=limit,
-        db_uri=ctx.config.db_uri,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     tournament, players = search_paid_players(command)
@@ -541,7 +566,7 @@ def add_federation_payment_tool(
         payment_date=payment_datetime,
         amount=amount,
         notes=notes,
-        db_uri=ctx.config.db_uri,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     result = add_federation_payment(command)
@@ -563,7 +588,7 @@ def remove_last_federation_payment_tool(
 ) -> str:
     """Remove the most recent federation payment for a player."""
     command = RemoveLastFederationPaymentCommand(
-        player_name=player_name, db_uri=ctx.config.db_uri
+        player_name=player_name, db_uri=ctx.request_context.lifespan_context["db_uri"]
     )
 
     result = remove_last_federation_payment(command)
@@ -588,7 +613,9 @@ def list_federation_payments_tool(
 ) -> str:
     """List all federation payments for a player."""
     command = ListFederationPaymentsCommand(
-        player_name=player_name, limit=limit, db_uri=ctx.config.db_uri
+        player_name=player_name,
+        limit=limit,
+        db_uri=ctx.request_context.lifespan_context["db_uri"],
     )
 
     player, payments = list_federation_payments(command)
