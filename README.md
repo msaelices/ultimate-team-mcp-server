@@ -1,6 +1,6 @@
 # Ultimate Frisbee Team MCP Server
 
-A Model Context Protocol (MCP) server for managing Ultimate Frisbee Team players, tournaments, etc. This server allows you to add, list, and remove players from a SQLite database, as well as backup the database.
+A Model Context Protocol (MCP) server for managing Ultimate Frisbee Team players, tournaments, etc. This server allows you to add, list, and remove players from a SQLite database, as well as backup the database. Now uses FastMCP for improved performance and usability!
 
 ## Features
 
@@ -10,6 +10,7 @@ A Model Context Protocol (MCP) server for managing Ultimate Frisbee Team players
 - Backup the database to a file
 - Import players from a CSV file
 - Accessible via CLI or MCP interface
+- Now using FastMCP for improved AI interaction!
 
 ## Setup
 
@@ -82,24 +83,29 @@ ultimate-team-mcp-server
 
 2. Install Claude Code.
 
-3. Add the FDU MCP server:
+3. Add the Ultimate Team MCP server directly to Claude:
+
 ```bash
-# Add the FDU MCP server
-claude mcp add fdu -- ultimate-team-mcp-server
+# Set up with the new FastMCP-based server
+# This works with both Claude Desktop and Claude CLI
+claude mcp add ultimate -- ultimate-team-mcp-server
 
 # List existing MCP servers - Validate that the server is running
 claude mcp list
 ```
 
-4. Add the WhatsApp MCP server (optional):
-```bash
-uv pip install git+https://github.com/msaelices/whatsapp-mcp-server.git@main
-claude mcp add whatsapp -- whatsapp-mcp
-```
+4. Use the server via Claude's web interface or CLI.
 
-4. Use the server via Claude:
+#### Using with custom database URI
+
+You can specify a database URI when starting the server:
+
 ```bash
-claude
+# Using environment variable
+SQLITE_URI="sqlitecloud://host:port/database?apikey=key" ultimate-team-mcp-server
+
+# Or using command-line option
+ultimate-team-mcp-server --db-uri "sqlitecloud://host:port/database?apikey=key"
 ```
 
 ## Database Structure
@@ -120,11 +126,11 @@ CREATE TABLE players (
 The server can connect to either a local SQLite database or SQLiteCloud for a cloud-based solution using a single database URI parameter. To configure the database connection:
 
 1. Create a `.env` file based on the provided `.env-template`
-2. Set the `DB_URI` environment variable to one of the following formats:
-   - For SQLiteCloud: `DB_URI=sqlitecloud://hostname:port/database?apikey=your_api_key`
-   - For local SQLite: `DB_URI=file:///path/to/database.db`
+2. Set the `SQLITE_URI` or `DB_URI` environment variable to one of the following formats:
+   - For SQLiteCloud: `SQLITE_URI=sqlitecloud://hostname:port/database?apikey=your_api_key`
+   - For local SQLite: `SQLITE_URI=file:///path/to/database.db`
 
-If the `DB_URI` environment variable is not set, the server will default to using a local SQLite database at `./ultimate.db`.
+If neither environment variable is set, the server will default to using a local SQLite database at `~/.ultimate.db`.
 
 ## CSV Import Format
 

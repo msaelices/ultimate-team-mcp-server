@@ -1,3 +1,4 @@
+"""Main entry point for running the server directly."""
 import sys
 from . import main
 
