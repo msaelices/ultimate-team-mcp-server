@@ -43,22 +43,18 @@ source .venv/bin/activate
 ```
 
 3. Install the package in development mode with dev dependencies:
-```bash
-pip install -e ".[dev]"
-```
 
-   Or using uv:
-   ```bash
-   uv pip install -e ".[dev]"
-   ```
+```bash
+uv pip install -e ".[dev]"
+```
 
 4. Set up environment variables (optional, for SQLiteCloud):
    
-   Copy the .env-template file to .env and fill in the appropriate values:
-   ```bash
-   cp .env-template .env
-   # Edit .env with your SQLiteCloud credentials
-   ```
+Copy the .env-template file to .env and fill in the appropriate values:
+```bash
+cp .env-template .env
+# Edit .env with your SQLiteCloud credentials
+```
 
 5. Run tests:
 ```bash
