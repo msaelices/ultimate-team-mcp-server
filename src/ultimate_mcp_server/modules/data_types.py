@@ -85,3 +85,38 @@ class RemoveTournamentCommand(BaseModel):
     id: int
     db_uri: str = DEFAULT_DB_URI
 
+
+class TournamentPlayer(BaseModel):
+    """Represents a player registered for a tournament."""
+    tournament_id: int
+    player_name: str
+    registered_at: datetime
+
+
+class RegisterPlayerCommand(BaseModel):
+    """Command to register a player for a tournament."""
+    tournament_id: int
+    player_name: str
+    db_uri: str = DEFAULT_DB_URI
+
+
+class UnregisterPlayerCommand(BaseModel):
+    """Command to unregister a player from a tournament."""
+    tournament_id: int
+    player_name: str
+    db_uri: str = DEFAULT_DB_URI
+
+
+class ListTournamentPlayersCommand(BaseModel):
+    """Command to list all players registered for a tournament."""
+    tournament_id: int
+    limit: int = 1000
+    db_uri: str = DEFAULT_DB_URI
+
+
+class ListPlayerTournamentsCommand(BaseModel):
+    """Command to list all tournaments a player is registered for."""
+    player_name: str
+    limit: int = 1000
+    db_uri: str = DEFAULT_DB_URI
+

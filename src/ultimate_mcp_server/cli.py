@@ -13,6 +13,10 @@ from .modules.data_types import (
     ListTournamentsCommand,
     UpdateTournamentCommand,
     RemoveTournamentCommand,
+    RegisterPlayerCommand,
+    UnregisterPlayerCommand,
+    ListTournamentPlayersCommand,
+    ListPlayerTournamentsCommand,
     SurfaceType
 )
 from .modules.functionality.add_player import add_player
@@ -24,6 +28,10 @@ from .modules.functionality.add_tournament import add_tournament
 from .modules.functionality.list_tournaments import list_tournaments
 from .modules.functionality.update_tournament import update_tournament
 from .modules.functionality.remove_tournament import remove_tournament
+from .modules.functionality.register_player import register_player
+from .modules.functionality.unregister_player import unregister_player
+from .modules.functionality.list_tournament_players import list_tournament_players
+from .modules.functionality.list_player_tournaments import list_player_tournaments
 from .modules.constants import DEFAULT_DB_URI
 
 @click.group()
@@ -253,6 +261,114 @@ def remove_tournament_command(id, db_uri):
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         sys.exit(1)
+
+@cli.command("register-player")
+@click.option("--tournament-id", "-t", required=True, type=int, help="Tournament ID")
+@click.option("--player-name", "-p", required=True, help="Name of the player to register")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def register_player_command(tournament_id, player_name, db_uri):
+    """Register a player for a tournament."""
+    try:
+        command = RegisterPlayerCommand(
+            tournament_id=tournament_id,
+            player_name=player_name,
+            db_uri=db_uri
+        )
+        result = register_player(command)
+        click.echo(f"Player '{result.player_name}' registered for tournament ID {result.tournament_id}")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("unregister-player")
+@click.option("--tournament-id", "-t", required=True, type=int, help="Tournament ID")
+@click.option("--player-name", "-p", required=True, help="Name of the player to unregister")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def unregister_player_command(tournament_id, player_name, db_uri):
+    """Unregister a player from a tournament."""
+    try:
+        command = UnregisterPlayerCommand(
+            tournament_id=tournament_id,
+            player_name=player_name,
+            db_uri=db_uri
+        )
+        result = unregister_player(command)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("list-tournament-players")
+@click.option("--tournament-id", "-t", required=True, type=int, help="Tournament ID")
+@click.option("--limit", "-l", default=1000, help="Maximum number of players to list")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def list_tournament_players_command(tournament_id, limit, db_uri):
+    """List all players registered for a tournament."""
+    try:
+        command = ListTournamentPlayersCommand(
+            tournament_id=tournament_id,
+            limit=limit,
+            db_uri=db_uri
+        )
+        tournament, players = list_tournament_players(command)
+        
+        # Print tournament details
+        click.echo(f"Tournament: {tournament.name} (ID: {tournament.id})")
+        click.echo(f"Location: {tournament.location}")
+        click.echo(f"Date: {tournament.date}")
+        click.echo(f"Surface: {tournament.surface.value}")
+        
+        if not players:
+            click.echo("\nNo players registered for this tournament")
+            return
+        
+        # Print registered players
+        click.echo(f"\nRegistered Players ({len(players)}):")
+        for player in players:
+            email_display = f", Email: {player.email}" if player.email else ""
+            click.echo(f"- {player.name} (Phone: {player.phone}{email_display})")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("list-player-tournaments")
+@click.option("--player-name", "-p", required=True, help="Name of the player")
+@click.option("--limit", "-l", default=1000, help="Maximum number of tournaments to list")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def list_player_tournaments_command(player_name, limit, db_uri):
+    """List all tournaments a player is registered for."""
+    try:
+        command = ListPlayerTournamentsCommand(
+            player_name=player_name,
+            limit=limit,
+            db_uri=db_uri
+        )
+        player, tournaments = list_player_tournaments(command)
+        
+        # Print player details
+        click.echo(f"Player: {player.name}")
+        click.echo(f"Phone: {player.phone}")
+        if player.email:
+            click.echo(f"Email: {player.email}")
+        
+        if not tournaments:
+            click.echo("\nPlayer is not registered for any tournaments")
+            return
+        
+        # Print registered tournaments
+        click.echo(f"\nRegistered Tournaments ({len(tournaments)}):")
+        for tournament in tournaments:
+            click.echo(f"- ID: {tournament.id}, Name: {tournament.name}")
+            click.echo(f"  Date: {tournament.date}, Location: {tournament.location}")
+            click.echo(f"  Surface: {tournament.surface.value}")
+            click.echo("")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     cli()

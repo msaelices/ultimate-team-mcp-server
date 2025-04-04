@@ -39,6 +39,17 @@ def init_db(db_uri: str = DEFAULT_DB_URI) -> None:
         created TIMESTAMP NOT NULL
     )
     """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tournament_players (
+        tournament_id INTEGER,
+        player_name TEXT,
+        registered_at TIMESTAMP NOT NULL,
+        PRIMARY KEY (tournament_id, player_name),
+        FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+        FOREIGN KEY (player_name) REFERENCES players(name) ON DELETE CASCADE
+    )
+    """)
 
     conn.commit()
     conn.close()
