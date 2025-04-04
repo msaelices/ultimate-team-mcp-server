@@ -28,5 +28,17 @@ def init_db(db_uri: str = DEFAULT_DB_URI) -> None:
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tournaments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        location TEXT NOT NULL,
+        date TEXT NOT NULL,
+        surface TEXT NOT NULL CHECK(surface IN ('grass', 'beach')),
+        registration_deadline TEXT NOT NULL,
+        created TIMESTAMP NOT NULL
+    )
+    """)
+
     conn.commit()
     conn.close()
