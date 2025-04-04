@@ -138,3 +138,35 @@ class ClearPaymentCommand(BaseModel):
     player_name: str
     db_uri: str = DEFAULT_DB_URI
 
+
+class FederationPayment(BaseModel):
+    """Represents a federation payment made by a player."""
+    id: Optional[int] = None
+    player_name: str
+    payment_date: datetime
+    amount: float
+    notes: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+
+class AddFederationPaymentCommand(BaseModel):
+    """Command to add a federation payment for a player."""
+    player_name: str
+    payment_date: datetime  
+    amount: float
+    notes: Optional[str] = None
+    db_uri: str = DEFAULT_DB_URI
+
+
+class RemoveLastFederationPaymentCommand(BaseModel):
+    """Command to remove the most recent federation payment for a player."""
+    player_name: str
+    db_uri: str = DEFAULT_DB_URI
+
+
+class ListFederationPaymentsCommand(BaseModel):
+    """Command to list all federation payments for a player."""
+    player_name: str
+    limit: int = 100
+    db_uri: str = DEFAULT_DB_URI
+

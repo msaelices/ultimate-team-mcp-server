@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from datetime import date
+from datetime import date, datetime
 import click
 
 from .modules.data_types import (
@@ -19,6 +19,9 @@ from .modules.data_types import (
     ListPlayerTournamentsCommand,
     MarkPaymentCommand,
     ClearPaymentCommand,
+    AddFederationPaymentCommand,
+    RemoveLastFederationPaymentCommand,
+    ListFederationPaymentsCommand,
     SurfaceType
 )
 from .modules.functionality.add_player import add_player
@@ -36,6 +39,9 @@ from .modules.functionality.list_tournament_players import list_tournament_playe
 from .modules.functionality.list_player_tournaments import list_player_tournaments
 from .modules.functionality.mark_payment import mark_payment
 from .modules.functionality.clear_payment import clear_payment
+from .modules.functionality.add_federation_payment import add_federation_payment
+from .modules.functionality.remove_last_federation_payment import remove_last_federation_payment
+from .modules.functionality.list_federation_payments import list_federation_payments
 from .modules.constants import DEFAULT_DB_URI
 
 @click.group()
@@ -421,6 +427,110 @@ def clear_payment_command(tournament_id, player_name, db_uri):
         )
         result = clear_payment(command)
         click.echo(f"Payment status cleared for player '{result.player_name}' in tournament ID {result.tournament_id}")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("add-federation-payment")
+@click.option("--player-name", "-p", required=True, help="Name of the player")
+@click.option("--amount", "-a", required=True, type=float, help="Payment amount")
+@click.option("--payment-date", "-d", type=click.DateTime(formats=["%Y-%m-%d"]), 
+              default=lambda: datetime.now().date(), help="Payment date (YYYY-MM-DD), defaults to today")
+@click.option("--notes", "-n", help="Optional notes about the payment")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def add_federation_payment_command(player_name, amount, payment_date, notes, db_uri):
+    """Add a federation payment for a player."""
+    try:
+        # Convert date to datetime with noon time to avoid timezone issues
+        payment_datetime = datetime.combine(payment_date.date(), datetime.min.time().replace(hour=12))
+        
+        command = AddFederationPaymentCommand(
+            player_name=player_name,
+            payment_date=payment_datetime,
+            amount=amount,
+            notes=notes,
+            db_uri=db_uri
+        )
+        
+        result = add_federation_payment(command)
+        
+        click.echo(f"Federation payment added for player '{result.player_name}'")
+        click.echo(f"Payment ID: {result.id}")
+        click.echo(f"Amount: {result.amount}")
+        click.echo(f"Date: {result.payment_date.strftime('%Y-%m-%d')}")
+        if result.notes:
+            click.echo(f"Notes: {result.notes}")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("remove-last-federation-payment")
+@click.option("--player-name", "-p", required=True, help="Name of the player")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def remove_last_federation_payment_command(player_name, db_uri):
+    """Remove the most recent federation payment for a player."""
+    try:
+        command = RemoveLastFederationPaymentCommand(
+            player_name=player_name,
+            db_uri=db_uri
+        )
+        
+        result = remove_last_federation_payment(command)
+        
+        if result:
+            click.echo(f"Removed federation payment for player '{result.player_name}'")
+            click.echo(f"Payment ID: {result.id}")
+            click.echo(f"Amount: {result.amount}")
+            click.echo(f"Date: {result.payment_date.strftime('%Y-%m-%d')}")
+            if result.notes:
+                click.echo(f"Notes: {result.notes}")
+        else:
+            click.echo(f"No federation payments found for player '{player_name}'")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("list-federation-payments")
+@click.option("--player-name", "-p", required=True, help="Name of the player")
+@click.option("--limit", "-l", default=100, help="Maximum number of payments to list")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def list_federation_payments_command(player_name, limit, db_uri):
+    """List all federation payments for a player."""
+    try:
+        command = ListFederationPaymentsCommand(
+            player_name=player_name,
+            limit=limit,
+            db_uri=db_uri
+        )
+        
+        player, payments = list_federation_payments(command)
+        
+        # Print player details
+        click.echo(f"Player: {player.name}")
+        click.echo(f"Phone: {player.phone}")
+        if player.email:
+            click.echo(f"Email: {player.email}")
+        
+        if not payments:
+            click.echo("\nNo federation payments found for this player")
+            return
+        
+        # Print federation payments
+        click.echo(f"\nFederation Payments ({len(payments)}):")
+        
+        # Calculate total
+        total_amount = sum(payment.amount for payment in payments)
+        
+        for payment in payments:
+            click.echo(f"- ID: {payment.id}, Date: {payment.payment_date.strftime('%Y-%m-%d')}")
+            click.echo(f"  Amount: {payment.amount:.2f}")
+            if payment.notes:
+                click.echo(f"  Notes: {payment.notes}")
+        
+        click.echo(f"\nTotal Payments: {total_amount:.2f}")
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         sys.exit(1)

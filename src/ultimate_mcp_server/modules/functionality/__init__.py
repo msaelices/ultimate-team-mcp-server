@@ -14,3 +14,6 @@ from .list_tournament_players import list_tournament_players, PlayerWithPayment
 from .list_player_tournaments import list_player_tournaments
 from .mark_payment import mark_payment
 from .clear_payment import clear_payment
+from .add_federation_payment import add_federation_payment
+from .remove_last_federation_payment import remove_last_federation_payment
+from .list_federation_payments import list_federation_payments
