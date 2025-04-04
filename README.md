@@ -1,14 +1,30 @@
 # Ultimate Frisbee Team MCP Server
 
-A Model Context Protocol (MCP) server for managing Ultimate Frisbee Team players, tournaments, etc. This server allows you to add, list, and remove players from a SQLite database, as well as backup the database. Now uses FastMCP for improved performance and usability!
+A Model Context Protocol (MCP) server for managing Ultimate Frisbee Team players, tournaments, and payments. This server allows you to add, list, and manage players and tournaments in a SQLite database, as well as track tournament registrations and payments. Now uses FastMCP for improved performance and usability!
 
 ## Features
 
+### Player Management
 - Add players with their name, phone number, and optional email
 - List all players in the database
 - Remove players from the database
-- Backup the database to a file
 - Import players from a CSV file
+
+### Tournament Management
+- Create tournaments with name, location, date, surface type (grass/beach), and registration deadline
+- List, update, and remove tournaments
+- Register/unregister players for tournaments
+- Track tournament payment status for each player
+- Search for players who have paid for a tournament with fuzzy name matching
+
+### Federation Payment Tracking
+- Record federation payments made by players
+- Track payment amounts and dates
+- List payment history for players
+- Remove the most recent payment if needed
+
+### System Features
+- Backup the database to a file
 - Accessible via CLI or MCP interface
 - Now using FastMCP for improved AI interaction!
 
@@ -53,6 +69,8 @@ pytest tests/
 
 ### CLI Usage
 
+#### Player Management
+
 ```bash
 # Add a player
 ultimate-team-mcp-server add-player "John Smith" --phone "+1234567890" --email "john@example.com"
@@ -63,18 +81,93 @@ ultimate-team-mcp-server list-players
 # Remove a player
 ultimate-team-mcp-server remove-player --name "John Smith"
 
-# Backup the database
-ultimate-team-mcp-server backup /path/to/backup.db
-
 # Import players from a CSV file, updating existing ones
 ultimate-team-mcp-server import-players /path/to/players.csv
+```
+
+#### Tournament Management
+
+```bash
+# Add a tournament
+ultimate-team-mcp-server add-tournament --name "Summer Championship" --location "City Beach" \
+  --date "2025-07-15" --surface "beach" --registration-deadline "2025-06-30"
+
+# List all tournaments
+ultimate-team-mcp-server list-tournaments
+
+# Update a tournament
+ultimate-team-mcp-server update-tournament --id 1 --name "Summer Beach Championship" --location "North Beach"
+
+# Remove a tournament
+ultimate-team-mcp-server remove-tournament --id 1
+
+# Register a player for a tournament
+ultimate-team-mcp-server register-player --tournament-id 1 --player-name "John Smith"
+
+# Unregister a player from a tournament
+ultimate-team-mcp-server unregister-player --tournament-id 1 --player-name "John Smith"
+
+# List all players registered for a tournament
+ultimate-team-mcp-server list-tournament-players --tournament-id 1
+
+# List all tournaments a player is registered for
+ultimate-team-mcp-server list-player-tournaments --player-name "John Smith"
+
+# Mark a player as having paid for a tournament
+ultimate-team-mcp-server mark-payment --tournament-id 1 --player-name "John Smith"
+
+# Clear a player's payment status for a tournament
+ultimate-team-mcp-server clear-payment --tournament-id 1 --player-name "John Smith"
+
+# Search for players who have paid for a tournament (with fuzzy matching)
+ultimate-team-mcp-server search-paid-players --tournament-id 1 --name "John"
+```
+
+#### Federation Payment Tracking
+
+```bash
+# Add a federation payment for a player
+ultimate-team-mcp-server add-federation-payment --player-name "John Smith" \
+  --amount 50.0 --payment-date "2025-01-15" --notes "Annual fee"
+
+# List all federation payments for a player
+ultimate-team-mcp-server list-federation-payments --player-name "John Smith"
+
+# Remove the most recent federation payment for a player
+ultimate-team-mcp-server remove-last-federation-payment --player-name "John Smith"
+```
+
+#### System Commands
+
+```bash
+# Backup the database
+ultimate-team-mcp-server backup /path/to/backup.db
 
 # Using with a specific database URI
 ultimate-team-mcp-server list-players --db-uri "sqlitecloud://host:port/database?apikey=key"
 ultimate-team-mcp-server add-player "John" --phone "+1234567890" --db-uri "file:///path/to/custom.db"
 ```
 
-### MCP Server Usage
+
+### Usage with Claude Desktop
+
+To use the MCP server with Claude Desktop, you need to add it to your `claude_desktop_config.json` file:
+
+```json
+{
+    "mcpServers": {
+        "ultimate_mcp_server": {
+            "command": "ultimate-team-mcp-server",
+            "environment": {
+            "SQLITE_URI": "sqlitecloud://host:port/database?apikey=key"
+            }
+        }
+    }
+}
+```
+
+### Usage with Claude Code
+
 
 1. Start the MCP server:
 ```bash
@@ -94,7 +187,11 @@ claude mcp add ultimate -- ultimate-team-mcp-server
 claude mcp list
 ```
 
-4. Use the server via Claude's web interface or CLI.
+Run Claude code with the following command:
+
+```bash
+claude
+```
 
 #### Using with custom database URI
 
@@ -110,16 +207,14 @@ ultimate-team-mcp-server --db-uri "sqlitecloud://host:port/database?apikey=key"
 
 ## Database Structure
 
-The server can use either local SQLite or SQLiteCloud to store player information. The database schema is:
+The server uses SQLite or SQLiteCloud to store player data, tournaments, registrations, payments, and related information. The database now includes tables for:
 
-```sql
-CREATE TABLE players (
-    name TEXT PRIMARY KEY,
-    created TIMESTAMP,
-    phone TEXT,
-    email TEXT
-)
-```
+- Players (name, contact info)
+- Tournaments (name, location, date, surface type, registration deadline)
+- Tournament-Player registrations (with payment tracking)
+- Federation payments (with amount and payment history)
+
+The complete schema definition is located in the `src/ultimate_mcp_server/modules/init_db.py` file.
 
 ### Database Configuration
 
