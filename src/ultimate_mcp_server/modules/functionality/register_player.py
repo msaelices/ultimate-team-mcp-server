@@ -66,8 +66,9 @@ def register_player(command: RegisterPlayerCommand) -> TournamentPlayer:
         now = datetime.now()
         cursor.execute(
             """
-            INSERT INTO tournament_players (tournament_id, player_name, registered_at)
-            VALUES (?, ?, ?)
+            INSERT INTO tournament_players 
+            (tournament_id, player_name, registered_at, has_paid, payment_date)
+            VALUES (?, ?, ?, 0, NULL)
             """, 
             (command.tournament_id, command.player_name, now)
         )
@@ -76,7 +77,9 @@ def register_player(command: RegisterPlayerCommand) -> TournamentPlayer:
         return TournamentPlayer(
             tournament_id=command.tournament_id,
             player_name=command.player_name,
-            registered_at=now
+            registered_at=now,
+            has_paid=False,
+            payment_date=None
         )
     except Exception as e:
         conn.rollback()

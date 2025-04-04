@@ -10,5 +10,7 @@ from .update_tournament import update_tournament
 from .remove_tournament import remove_tournament
 from .register_player import register_player
 from .unregister_player import unregister_player
-from .list_tournament_players import list_tournament_players
+from .list_tournament_players import list_tournament_players, PlayerWithPayment
 from .list_player_tournaments import list_player_tournaments
+from .mark_payment import mark_payment
+from .clear_payment import clear_payment

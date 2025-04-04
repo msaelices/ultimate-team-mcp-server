@@ -91,6 +91,8 @@ class TournamentPlayer(BaseModel):
     tournament_id: int
     player_name: str
     registered_at: datetime
+    has_paid: bool = False
+    payment_date: Optional[datetime] = None
 
 
 class RegisterPlayerCommand(BaseModel):
@@ -118,5 +120,21 @@ class ListPlayerTournamentsCommand(BaseModel):
     """Command to list all tournaments a player is registered for."""
     player_name: str
     limit: int = 1000
+    db_uri: str = DEFAULT_DB_URI
+
+
+class MarkPaymentCommand(BaseModel):
+    """Command to mark a player's tournament payment."""
+    tournament_id: int
+    player_name: str
+    # If payment_date is None, current date and time will be used
+    payment_date: Optional[datetime] = None
+    db_uri: str = DEFAULT_DB_URI
+    
+    
+class ClearPaymentCommand(BaseModel):
+    """Command to clear a player's tournament payment."""
+    tournament_id: int
+    player_name: str
     db_uri: str = DEFAULT_DB_URI
 

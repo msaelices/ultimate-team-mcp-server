@@ -45,6 +45,8 @@ def init_db(db_uri: str = DEFAULT_DB_URI) -> None:
         tournament_id INTEGER,
         player_name TEXT,
         registered_at TIMESTAMP NOT NULL,
+        has_paid BOOLEAN NOT NULL DEFAULT 0,
+        payment_date TIMESTAMP NULL,
         PRIMARY KEY (tournament_id, player_name),
         FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
         FOREIGN KEY (player_name) REFERENCES players(name) ON DELETE CASCADE

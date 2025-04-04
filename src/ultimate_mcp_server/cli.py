@@ -17,6 +17,8 @@ from .modules.data_types import (
     UnregisterPlayerCommand,
     ListTournamentPlayersCommand,
     ListPlayerTournamentsCommand,
+    MarkPaymentCommand,
+    ClearPaymentCommand,
     SurfaceType
 )
 from .modules.functionality.add_player import add_player
@@ -30,8 +32,10 @@ from .modules.functionality.update_tournament import update_tournament
 from .modules.functionality.remove_tournament import remove_tournament
 from .modules.functionality.register_player import register_player
 from .modules.functionality.unregister_player import unregister_player
-from .modules.functionality.list_tournament_players import list_tournament_players
+from .modules.functionality.list_tournament_players import list_tournament_players, PlayerWithPayment
 from .modules.functionality.list_player_tournaments import list_player_tournaments
+from .modules.functionality.mark_payment import mark_payment
+from .modules.functionality.clear_payment import clear_payment
 from .modules.constants import DEFAULT_DB_URI
 
 @click.group()
@@ -324,11 +328,16 @@ def list_tournament_players_command(tournament_id, limit, db_uri):
             click.echo("\nNo players registered for this tournament")
             return
         
-        # Print registered players
+        # Print registered players with payment info
         click.echo(f"\nRegistered Players ({len(players)}):")
-        for player in players:
+        for player_info in players:
+            player = player_info.player
             email_display = f", Email: {player.email}" if player.email else ""
-            click.echo(f"- {player.name} (Phone: {player.phone}{email_display})")
+            payment_status = "[PAID]" if player_info.has_paid else "[UNPAID]"
+            payment_date = f" on {player_info.payment_date.strftime('%Y-%m-%d')}" if player_info.payment_date else ""
+            
+            click.echo(f"- {player.name} {payment_status}{payment_date}")
+            click.echo(f"  Phone: {player.phone}{email_display}")
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         sys.exit(1)
@@ -365,6 +374,53 @@ def list_player_tournaments_command(player_name, limit, db_uri):
             click.echo(f"  Date: {tournament.date}, Location: {tournament.location}")
             click.echo(f"  Surface: {tournament.surface.value}")
             click.echo("")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("mark-payment")
+@click.option("--tournament-id", "-t", required=True, type=int, help="Tournament ID")
+@click.option("--player-name", "-p", required=True, help="Name of the player")
+@click.option("--payment-date", "-d", type=click.DateTime(formats=["%Y-%m-%d"]), 
+              help="Payment date (YYYY-MM-DD), defaults to today")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def mark_payment_command(tournament_id, player_name, payment_date, db_uri):
+    """Mark a player as having paid for a tournament."""
+    try:
+        # Convert date to datetime if provided
+        payment_datetime = payment_date.replace(hour=12) if payment_date else None
+        
+        command = MarkPaymentCommand(
+            tournament_id=tournament_id,
+            player_name=player_name,
+            payment_date=payment_datetime,
+            db_uri=db_uri
+        )
+        result = mark_payment(command)
+        
+        payment_date_str = result.payment_date.strftime("%Y-%m-%d %H:%M")
+        click.echo(f"Player '{result.player_name}' marked as paid for tournament ID {result.tournament_id}")
+        click.echo(f"Payment date: {payment_date_str}")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("clear-payment")
+@click.option("--tournament-id", "-t", required=True, type=int, help="Tournament ID")
+@click.option("--player-name", "-p", required=True, help="Name of the player")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def clear_payment_command(tournament_id, player_name, db_uri):
+    """Clear a player's payment status for a tournament."""
+    try:
+        command = ClearPaymentCommand(
+            tournament_id=tournament_id,
+            player_name=player_name,
+            db_uri=db_uri
+        )
+        result = clear_payment(command)
+        click.echo(f"Payment status cleared for player '{result.player_name}' in tournament ID {result.tournament_id}")
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         sys.exit(1)
