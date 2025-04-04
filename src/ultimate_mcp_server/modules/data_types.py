@@ -170,3 +170,12 @@ class ListFederationPaymentsCommand(BaseModel):
     limit: int = 100
     db_uri: str = DEFAULT_DB_URI
 
+
+class SearchPaidPlayersCommand(BaseModel):
+    """Command to search for players who have paid for a tournament with fuzzy name matching."""
+    tournament_id: int
+    name_query: str = ""  # Optional, if empty will return all paid players
+    match_threshold: float = 0.6  # Similarity threshold (0-1), higher = stricter matching
+    limit: int = 100
+    db_uri: str = DEFAULT_DB_URI
+

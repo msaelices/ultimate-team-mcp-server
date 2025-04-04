@@ -22,6 +22,7 @@ from .modules.data_types import (
     AddFederationPaymentCommand,
     RemoveLastFederationPaymentCommand,
     ListFederationPaymentsCommand,
+    SearchPaidPlayersCommand,
     SurfaceType
 )
 from .modules.functionality.add_player import add_player
@@ -42,6 +43,7 @@ from .modules.functionality.clear_payment import clear_payment
 from .modules.functionality.add_federation_payment import add_federation_payment
 from .modules.functionality.remove_last_federation_payment import remove_last_federation_payment
 from .modules.functionality.list_federation_payments import list_federation_payments
+from .modules.functionality.search_paid_players import search_paid_players, PlayerPaymentInfo
 from .modules.constants import DEFAULT_DB_URI
 
 @click.group()
@@ -531,6 +533,65 @@ def list_federation_payments_command(player_name, limit, db_uri):
                 click.echo(f"  Notes: {payment.notes}")
         
         click.echo(f"\nTotal Payments: {total_amount:.2f}")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@cli.command("search-paid-players")
+@click.option("--tournament-id", "-t", required=True, type=int, help="Tournament ID")
+@click.option("--name", "-n", help="Name to search for (fuzzy matching)")
+@click.option("--threshold", "-m", type=float, default=0.6, 
+              help="Match threshold (0-1), higher = stricter matching")
+@click.option("--limit", "-l", default=100, help="Maximum number of results")
+@click.option("--db-uri", default=DEFAULT_DB_URI, help="Database URI (sqlitecloud:// or file://)")
+def search_paid_players_command(tournament_id, name, threshold, limit, db_uri):
+    """Search for players who have paid for a tournament, with fuzzy name matching."""
+    try:
+        command = SearchPaidPlayersCommand(
+            tournament_id=tournament_id,
+            name_query=name if name else "",
+            match_threshold=threshold,
+            limit=limit,
+            db_uri=db_uri
+        )
+        
+        tournament, players = search_paid_players(command)
+        
+        # Print tournament details
+        click.echo(f"Tournament: {tournament.name} (ID: {tournament.id})")
+        click.echo(f"Location: {tournament.location}")
+        click.echo(f"Date: {tournament.date}")
+        
+        if not players:
+            if name:
+                click.echo(f"\nNo players matching '{name}' found who have paid for this tournament")
+            else:
+                click.echo("\nNo players have paid for this tournament")
+            return
+        
+        # Print matching players
+        if name:
+            click.echo(f"\nPlayers matching '{name}' who have paid ({len(players)}):")
+        else:
+            click.echo(f"\nPlayers who have paid ({len(players)}):")
+            
+        for player_info in players:
+            player = player_info.player
+            email_display = f", Email: {player.email}" if player.email else ""
+            payment_date = player_info.payment_date.strftime("%Y-%m-%d")
+            
+            # Show match score if searching
+            match_display = ""
+            if name:
+                match_percentage = int(player_info.match_score * 100)
+                match_display = f" (Match: {match_percentage}%)"
+            
+            click.echo(f"- {player.name}{match_display}")
+            click.echo(f"  Phone: {player.phone}{email_display}")
+            click.echo(f"  Paid on: {payment_date}")
+            click.echo("")
+            
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         sys.exit(1)

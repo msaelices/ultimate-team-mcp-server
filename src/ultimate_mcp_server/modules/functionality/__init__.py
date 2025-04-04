@@ -17,3 +17,4 @@ from .clear_payment import clear_payment
 from .add_federation_payment import add_federation_payment
 from .remove_last_federation_payment import remove_last_federation_payment
 from .list_federation_payments import list_federation_payments
+from .search_paid_players import search_paid_players, PlayerPaymentInfo
